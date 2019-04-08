@@ -229,7 +229,7 @@ See `jupyter-initialize-connection'."
               (list info-or-session
                     '(or jupyter-session-p json-plist-p stringp))))))
 
-;; NOTE: This requires that CLIENT is communicating with a kernel using a
+;; FIXME: This requires that CLIENT is communicating with a kernel using a
 ;; `jupyter-channel-ioloop-comm' object.
 (cl-defmethod jupyter-initialize-connection ((client jupyter-kernel-client) info-or-session)
   "Initialize CLIENT with connection INFO-OR-SESSION.

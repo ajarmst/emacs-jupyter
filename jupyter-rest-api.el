@@ -62,6 +62,7 @@
 
 (defun jupyter-api--get-auth (client)
   "Return the value of the Authentication header to use for CLIENT."
+  ;; TODO: Look into (url-get-authentication)
   (url-digest-auth
    (oref client url) 'prompt nil
    (oref client url) `(("nonce" . ,(sha1 (number-to-string (random)))))))

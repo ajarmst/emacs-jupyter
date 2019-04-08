@@ -1476,6 +1476,34 @@ last element being the newest element added to the history."
                  (should (equal (plist-get plist :on-open) 'identity)))))
       (jupyter-api-request client "WS" "kernels" :on-open 'identity))))
 
+;;; Jupyter gateway
+
+(ert-deftest jupyter-gateway ()
+  :tags '(gateway)
+  (skip-unless (jupyter-command "kernelgateway" "help"))
+  (require 'jupyter-gateway)
+  (let* ((port "8878")
+         (gateway-proc (start-process
+                        "jupyter-gateway"
+                        nil "jupyter" "kernelgateway"
+                        (concat "--port=" port))))
+    ;; Let the gateway start up
+    (sleep-for 2)
+    (unwind-protect
+        (cl-destructuring-bind (manager client)
+            (jupyter-gateway-start-new-kernel
+             (jupyter-gateway
+              :url (concat "http://localhost:" port)
+              :ws-url (concat "ws://localhost:" port))
+             "python")
+          (unwind-protect
+              (let ((jupyter-current-client client))
+                ;; TODO: Get rid of these sleep calls
+                (sleep-for 2)
+                (should (equal (jupyter-eval "1 + 1") "2")))
+            (jupyter-shutdown-kernel manager)))
+      (delete-process gateway-proc))))
+
 ;;; `org-mode'
 
 (defvar org-babel-jupyter-resource-directory nil)
