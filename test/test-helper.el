@@ -238,6 +238,26 @@ running BODY."
   `(jupyter-test-with-kernel-repl "python" ,client
      ,@body))
 
+(defmacro jupyter-test-rest-api (bodyform &rest check-forms)
+  "Replace the body of `url-retrieve-synchronously' with CHECK-FORMS, evaluate BODYFORM."
+  (declare (indent 1))
+  `(progn
+     (defvar url-request-data)
+     (defvar url-request-method)
+     (defvar url-request-extra-headers)
+     (defvar url-http-end-of-headers)
+     (let (url-request-data
+           url-request-method
+           url-request-extra-headers
+           url-http-end-of-headers)
+       (with-temp-buffer
+         (cl-letf (((symbol-function #'url-retrieve-synchronously)
+                    (lambda (url &rest _)
+                      (setq url-http-end-of-headers (point-min))
+                      ,@check-forms
+                      (current-buffer))))
+           ,bodyform)))))
+
 ;;; Functions
 
 (defun jupyter-test-ipython-kernel-version (spec)

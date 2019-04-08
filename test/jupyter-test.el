@@ -1450,6 +1450,32 @@ last element being the newest element added to the history."
           (let ((kill-buffer-query-functions nil))
             (kill-buffer)))))))
 
+;;; REST API
+
+(ert-deftest jupyter-rest-api ()
+  :tags '(rest)
+  (let ((client (jupyter-rest-client
+                 :url "http://foo"
+                 :ws-url "ws://foo")))
+    (jupyter-test-rest-api
+     (jupyter-api-request client "GET" "kernels")
+     (should (equal url "http://foo/api/kernels"))
+     (should (equal url-request-method "GET"))
+     (should (equal url-request-data nil))
+     (should (equal url-request-extra-headers nil)))
+    (jupyter-test-rest-api
+     (jupyter-api-request client "POST" "kernels" "ID" :name "bar")
+     (should (equal url "http://foo/api/kernels/ID"))
+     (should (equal url-request-method "POST"))
+     (should (equal url-request-data (json-encode '(:name "bar"))))
+     (should (equal (alist-get "Content Type" url-request-extra-headers nil nil #'equal)
+                    "application/json")))
+    (cl-letf (((symbol-function #'websocket-open)
+               (lambda (url &rest plist)
+                 (should (equal url "ws://foo/api/kernels"))
+                 (should (equal (plist-get plist :on-open) 'identity)))))
+      (jupyter-api-request client "WS" "kernels" :on-open 'identity))))
+
 ;;; `org-mode'
 
 (defvar org-babel-jupyter-resource-directory nil)
