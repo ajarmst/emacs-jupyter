@@ -42,6 +42,11 @@ Let bind to a non-nil value around a call to
 `jupyter-test-with-kernel-client' or `jupyter-test-with-kernel-repl' to
 start a new kernel REPL instead of re-using one.")
 
+;; The gateway doesn't work on Windows due to signal.SIGHUP not existing in python.
+(defvar jupyter-test-kernelgateway-p (and (not (memq system-type '(windows-nt ms-dos cygwin)))
+                                          (jupyter-command "kernelgateway" "help"))
+  "Non-nil if testing kernel servers using the Jupyter gateway.")
+
 ;;; `jupyter-echo-client'
 
 (defclass jupyter-echo-client (jupyter-kernel-client)
