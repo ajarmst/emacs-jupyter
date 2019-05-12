@@ -108,10 +108,13 @@ Optional argument REFRESH has the same meaning as in
    (lambda (s) (string-match-p re (car s)))
    (or specs (jupyter-available-kernelspecs refresh))))
 
-(defun jupyter-guess-kernelspec (name)
+(defun jupyter-guess-kernelspec (name &optional specs refresh)
   "Return the first kernelspec matching NAME.
-Raise an error if no kernelspec could be found."
-  (or (car (jupyter-find-kernelspecs name))
+Raise an error if no kernelspec could be found.
+
+SPECS and REFRESH have the same meaning as in
+`jupyter-find-kernelspecs'."
+  (or (car (jupyter-find-kernelspecs name specs refresh))
       (error "No valid kernelspec for kernel name (%s)" name)))
 
 (defun jupyter-completing-read-kernelspec (&optional specs refresh)
